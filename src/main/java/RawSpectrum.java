@@ -1,18 +1,22 @@
-import org.apache.hadoop.io.Writable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.hadoop.io.Writable;
 
 
 public class RawSpectrum implements Writable {
 
 	// file name example: 45005k2012.txt.gz
-	public static final Pattern
-	FILENAME_PATTERN = Pattern.compile("([0-9]{5})([dijkw])([0-9]{4})\\.txt\\.gz");
+	public static final Pattern	FILENAME_PATTERN = Pattern.compile("([0-9]{5})([dijkw])([0-9]{4})\\.txt\\.gz");
+
+  private float[] i;
+  private float[] j;
+  private float[] k;
+  private float[] w;
+  private float[] d;
 
 	public RawSpectrum() {}
 
@@ -94,5 +98,23 @@ public class RawSpectrum implements Writable {
 			+ "]";
 	}
 
-	float[] i = null, j = null, k = null, w = null, d = null;
+  public float[] getI() {
+    return i;
+  }
+
+  public float[] getJ() {
+    return j;
+  }
+
+  public float[] getK() {
+    return k;
+  }
+
+  public float[] getW() {
+    return w;
+  }
+
+  public float[] getD() {
+    return d;
+  }
 }
