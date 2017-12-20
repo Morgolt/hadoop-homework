@@ -42,26 +42,31 @@ enum Variables {
 
 public class SpectrumRecordWriter extends RecordWriter<Text, RawSpectrum> {
 
-  private static final String FILENAME_PATTERN = "/gfs/home/zuenok.chris/output-1/%s.ncd";
+  private static final String FILENAME_PATTERN = "/gfs/home/chris1408/output-4_1/%s_%s.ncd";
 
   private Map<String, NetcdfFileWriterState> fileStates = new HashMap<>();
 
   @Override
   public void write(Text key, RawSpectrum value) {
-    String station = key.toString();
+    if (value.isValid()) {
+      String station = key.toString();
+      String year = value.getDateTime().substring(0, 4);
+      String filename = String.format(FILENAME_PATTERN, year, station);
+      if (fileStates.containsKey(filename)) {
+        NetcdfFileWriterState fileState = fileStates.get(filename);
+        if (fileState == null) {
+          throw new RuntimeException("oops");
+        }
+        // no loop to explicitly specify the variables written
+        fileState.writeVariable(value.getI(), Variables.I);
+        fileState.writeVariable(value.getJ(), Variables.J);
+        fileState.writeVariable(value.getK(), Variables.K);
+        fileState.writeVariable(value.getW(), Variables.W);
+        fileState.writeVariable(value.getD(), Variables.D);
+      } else {
 
-    if (fileStates.containsKey(station)) {
-      NetcdfFileWriterState fileState = fileStates.get(station);
-
-      // no loop to explicitly specify the variables written
-      fileState.writeVariable(value.getI(), Variables.I);
-      fileState.writeVariable(value.getJ(), Variables.J);
-      fileState.writeVariable(value.getK(), Variables.K);
-      fileState.writeVariable(value.getW(), Variables.W);
-      fileState.writeVariable(value.getD(), Variables.D);
-    } else {
-      String filename = String.format(FILENAME_PATTERN, station);
-      fileStates.put(filename, new NetcdfFileWriterState(filename, value));
+        fileStates.put(filename, new NetcdfFileWriterState(filename, value));
+      }
     }
   }
 
@@ -96,7 +101,7 @@ public class SpectrumRecordWriter extends RecordWriter<Text, RawSpectrum> {
         this.frequency = writer.addDimension(
             null,
             FREQUENCY_DIMENSION,
-            spectrum.getD().length);
+            spectrum.getI().length);
 
         // initial names
         this.names = new HashMap<>();
@@ -124,6 +129,8 @@ public class SpectrumRecordWriter extends RecordWriter<Text, RawSpectrum> {
         variable.incrementOffset();
       } catch (IOException | InvalidRangeException e) {
         throw new RuntimeException(e);
+      } catch (NullPointerException e) {
+        throw new RuntimeException("Exception in write variable", e);
       }
     }
   }

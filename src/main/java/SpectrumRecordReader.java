@@ -19,7 +19,8 @@ public class SpectrumRecordReader
     extends RecordReader<Text, RawSpectrum> {
 
   // line example: 2012 01 01 00 00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   ...
-  private static final Pattern LINE_PATTERN = Pattern.compile("([0-9]{4} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2})(.*)");
+  private static final Pattern
+      LINE_PATTERN = Pattern.compile("([0-9]{4} [0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2})(.*)");
   private ArrayList<HashMap<String, float[]>> data;
   private Iterator<String> dateIterator;
   private Path[] files;
@@ -131,8 +132,9 @@ public class SpectrumRecordReader
       return false;
     }
 
-    key = new Text(curDateTime);
+    key = new Text(files[0].getName().substring(0, 5));
     value = new RawSpectrum();
+    value.setDateTime(curDateTime);
     for (int i = 0; i < data.size(); ++i) {
       value.setField(files[i].getName(), data.get(i).get(curDateTime));
     }
